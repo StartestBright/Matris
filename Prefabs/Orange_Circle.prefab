@@ -20,6 +20,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4957154247363398}
   - component: {fileID: 212833268217126908}
+  - component: {fileID: 114466483775680504}
+  - component: {fileID: 58183166559537328}
   m_Layer: 0
   m_Name: Orange_Circle
   m_TagString: Untagged
@@ -34,12 +36,38 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1393297687628398}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6696607, y: 0.6780619, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &58183166559537328
+CircleCollider2D:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1393297687628398}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.42666668
+--- !u!114 &114466483775680504
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1393297687628398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8a0ecc61e3af734b9565d6c74958e0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &212833268217126908
 SpriteRenderer:
   m_ObjectHideFlags: 1
