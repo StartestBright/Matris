@@ -187,6 +187,7 @@ public class GamePanel_Controller : MonoBehaviour {
                     circles_on_panel[j, i].GetComponent<Circle>().SetMatch(true);
                 }
                 //Debug.Log("L1 = " + left_1_circle + "\n" + "L2: " + left_2_circle + "\nT1 = " + top_1_circle + "\nT2 = " + top_2_circle + "\nR1 = " + right_1_circle + "\nR2 = " + right_2_circle + "\nB1 = " + bot_1_circle + "\nB2 = " + bot_2_circle + "\n verti = " + vertical_match_count + "\n hori = " + horizontal_match_count);
+
             }
            
         }

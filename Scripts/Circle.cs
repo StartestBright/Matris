@@ -45,6 +45,7 @@ public class Circle : MonoBehaviour  {
     {
         release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
         swipe_angle= Mathf.Atan2((release_position.y - touch_position.y) , (release_position.x - touch_position.x))/Mathf.PI *180;
+        
 
         GameObject other_circle = null;
         //Vector2 destination_point = this.transform.position;
@@ -105,13 +106,61 @@ public class Circle : MonoBehaviour  {
             this.y_position += 1;
         }
 
-        CheckMatch();
-    }
+        gamepanel.CheckMatch();
+        if (other_circle != null)
+        {
+            if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
+            {
+                StartCoroutine(MatchCheckToReturnBack(other_circle));
+                /*
+                //Vector2 origin_point = transform.position;
+                float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x;
+                float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y;
+                //Debug.Log("origin = " + transform.position.x+" "+transform.position.y+ " other = " + other_circle.transform.position.x+" "+other_circle.transform.position.y);
+                other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x,GetPosition().y));
+                SetPosition(new Vector2(other_x_origin,other_y_origin));
+                //other_circle.transform.position = Vector2.Lerp(other_circle.transform.position, new Vector2(transform.position.x, transform.position.y),.4f);
+                //transform.position = Vector2.Lerp(transform.position, new Vector2(other_x_origin, other_y_origin), .4f);
+                */
 
+            }
+        }
+        
+
+        
+    }
+    private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
+    {
+        yield return new WaitForSeconds(0.2f);
+        if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
+        {
+            //gamepanel.circles_on_panel[x_position,y_position]
+            float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x; //where this circle should go to
+            float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y; //where this circle should go to
+            float this_x_origin = GetPosition().x; //where the other circle should go to
+            float this_y_origin = GetPosition().y; //where the other circle should go to
+
+            GameObject other_temp_circle = gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin];
+
+            gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin] = gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y];
+            //gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y] = gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin];
+            gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin] = other_temp_circle;
+            Debug.Log(gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin]);
+            Debug.Log(gamepanel.circles_on_panel[(int)this_x_origin,(int)this_y_origin]);
+            
+            //Debug.Log("origin = " + transform.position.x+" "+transform.position.y+ " other = " + other_circle.transform.position.x+" "+other_circle.transform.position.y);
+            other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
+            SetPosition(new Vector2(other_x_origin, other_y_origin));
+            
+
+            
+        }
+    }
+    /*
     private void CheckMatch()
     {
         gamepanel.CheckMatch();
-        /*
+        
         horizontal_match_count = 1;
         vertical_match_count = 1;
         square_match_count = 0;
@@ -266,8 +315,9 @@ public class Circle : MonoBehaviour  {
             matched = true;
         }
         //Debug.Log("L1 = "+left_1_circle + "\n" +"L2: "+left_2_circle + "\nT1 = " + top_1_circle + "\nT2 = " + top_2_circle+"\nR1 = " + right_1_circle + "\nR2 = " + right_2_circle + "\nB1 = " + bot_1_circle + "\nB2 = " + bot_2_circle+"\n verti = "+vertical_match_count+"\n hori = "+horizontal_match_count);
-        */
-    }
+        
+    }*/
+
     
 
     public void SetMatch(bool match)
@@ -283,5 +333,10 @@ public class Circle : MonoBehaviour  {
     public Vector2 GetPosition()
     {
         return new Vector2(x_position, y_position);
+    }
+
+    public bool getMatched()
+    {
+        return matched;
     }
 }
