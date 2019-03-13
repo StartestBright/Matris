@@ -112,17 +112,6 @@ public class Circle : MonoBehaviour  {
             if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
             {
                 StartCoroutine(MatchCheckToReturnBack(other_circle));
-                /*
-                //Vector2 origin_point = transform.position;
-                float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x;
-                float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y;
-                //Debug.Log("origin = " + transform.position.x+" "+transform.position.y+ " other = " + other_circle.transform.position.x+" "+other_circle.transform.position.y);
-                other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x,GetPosition().y));
-                SetPosition(new Vector2(other_x_origin,other_y_origin));
-                //other_circle.transform.position = Vector2.Lerp(other_circle.transform.position, new Vector2(transform.position.x, transform.position.y),.4f);
-                //transform.position = Vector2.Lerp(transform.position, new Vector2(other_x_origin, other_y_origin), .4f);
-                */
-
             }
         }
         
@@ -142,17 +131,11 @@ public class Circle : MonoBehaviour  {
 
             GameObject other_temp_circle = gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin];
 
-            gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin] = gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y];
-            //gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y] = gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin];
-            gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin] = other_temp_circle;
-            Debug.Log(gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin]);
-            Debug.Log(gamepanel.circles_on_panel[(int)this_x_origin,(int)this_y_origin]);
+            gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin] = gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y]; //set this circle to it's original position in the array before swap
+            gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin] = other_temp_circle;  //set the other circle to it's original position in the array before swap
             
-            //Debug.Log("origin = " + transform.position.x+" "+transform.position.y+ " other = " + other_circle.transform.position.x+" "+other_circle.transform.position.y);
             other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
             SetPosition(new Vector2(other_x_origin, other_y_origin));
-            
-
             
         }
     }
