@@ -352,19 +352,81 @@ public class GamePanel_Controller : MonoBehaviour {
         
     }
     */
-    public void CheckAllMatch()
+    public bool CheckAllMatch()
     {
-
+        bool match_exists = false;
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
             {
-                CheckMatchAt(j, i);
+                if (CheckMatchAt(j, i))
+                    match_exists = true;
             }
         }
-        //CircleFallingCheck();
+        return match_exists;
         
     }
+    public void RefillGamePanel() //after swap -> destroy all matches -> Refill
+    {
+        for (int i = 0; i < width; i++)
+        {
+            int refill_count = 0;
+            for(int j = 0; j < height; j++)
+            {
+                if (circles_on_panel[i, j] != null)
+                {
+                    Circle current_circle = circles_on_panel[i, j].GetComponent<Circle>();
+                    if (j > 0)
+                    {
+                        int null_count = 0;
+                        for (int c = 0; c < j; c++)
+                        {
+                            if (circles_on_panel[i, c] == null)
+                            {
+                                null_count++;
+                            }
+                        }
+                        if (null_count > 0)
+                        {
+                            current_circle.SetPosition(new Vector2(i, j - null_count));
+                            circles_on_panel[i, j - null_count] = current_circle.gameObject;
+                            circles_on_panel[i, j] = null;
+                        }
+                    }
+                }
+                
+                
+            }
+            for (int y = 0; y < height; y++)
+            {
+                if (circles_on_panel[i, y] == null)
+                {
+                    refill_count++;
+                }
+            }
+            
+            for (int n = refill_count; n >0; n--)
+            {
+                GameObject random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
+                GameObject new_circle = GameObject.Instantiate(random_type_circle, new Vector2(i, height-1), Quaternion.identity) as GameObject;
+                circles_on_panel[i, height - 1] = new_circle;
+                new_circle.transform.parent = this.transform;
+                new_circle.GetComponent<Circle>().SetPosition(new Vector2(i, height-n));
+                circles_on_panel[i, height-n] = new_circle;
+            }
+            
+        }
+        //Checking matches again after refill then destroy and refill if match exists
+        bool match_exist = CheckAllMatch();
+        DestroyMatches();
+        Debug.Log(match_exist);
+        if (match_exist)
+        {
+            RefillGamePanel();
+            Debug.Log("exist");
+        }
+    }
+    /*
     public IEnumerator RefillGamePanelAt(int x_position)
     {
        
@@ -386,13 +448,13 @@ public class GamePanel_Controller : MonoBehaviour {
         CheckAllMatch(); // To check if there are matches after destroy and refill the circles
         yield return new WaitForSeconds(.2f);
     }
-
+    */
 
     public void DestroyMatchAt(int x,int y)
     {
         Destroy(circles_on_panel[x, y]);
         circles_on_panel[x,y] = null;
-        RefillGamePanelAt(x);
+        //RefillGamePanelAt(x);
         
     }
     public void DestroyMatches()

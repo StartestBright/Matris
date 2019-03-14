@@ -27,9 +27,11 @@ public class Circle : MonoBehaviour  {
         
         if (matched)
         {
-            gamepanel.DestroyMatchAt(x_position, y_position);
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.color = new Color(44, 11, 35);
+            //gamepanel.DestroyMatchAt(x_position, y_position);
         }
-
+        /*
         if (y_position > 0)
         {
             if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
@@ -44,6 +46,7 @@ public class Circle : MonoBehaviour  {
         {
             CircleFalling();
         }
+        */
         
     }
     private void OnMouseDown()
@@ -120,26 +123,29 @@ public class Circle : MonoBehaviour  {
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
         yield return new WaitForSeconds(0.3f);
-        if(other_circle!=null)//if it is not already matched so destroied
-        if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
-        {
-            
-            //gamepanel.circles_on_panel[x_position,y_position]
-            float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x; //where this circle should go to
-            float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y; //where this circle should go to
-            float this_x_origin = GetPosition().x; //where the other circle should go to
-            float this_y_origin = GetPosition().y; //where the other circle should go to
+        if (other_circle != null)//if it is not already matched so destroied
+            if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
+            {
 
-            GameObject other_temp_circle = gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin];
+                //gamepanel.circles_on_panel[x_position,y_position]
+                float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x; //where this circle should go to
+                float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y; //where this circle should go to
+                float this_x_origin = GetPosition().x; //where the other circle should go to
+                float this_y_origin = GetPosition().y; //where the other circle should go to
 
-            gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin] = gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y]; //set this circle to it's original position in the array before swap
-            gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin] = other_temp_circle;  //set the other circle to it's original position in the array before swap
-            
-            other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
-            SetPosition(new Vector2(other_x_origin, other_y_origin));
-            
-        }//else
-             //StartCoroutine( gamepanel.DestroyMatches() );
+                GameObject other_temp_circle = gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin];
+
+                gamepanel.circles_on_panel[(int)other_x_origin, (int)other_y_origin] = gamepanel.circles_on_panel[(int)GetPosition().x, (int)GetPosition().y]; //set this circle to it's original position in the array before swap
+                gamepanel.circles_on_panel[(int)this_x_origin, (int)this_y_origin] = other_temp_circle;  //set the other circle to it's original position in the array before swap
+
+                other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
+                SetPosition(new Vector2(other_x_origin, other_y_origin));
+            }
+            else
+            {
+                gamepanel.DestroyMatches();
+                gamepanel.RefillGamePanel();
+            }
     }
 
 
@@ -153,7 +159,7 @@ public class Circle : MonoBehaviour  {
                 y_position -= 1;
             }
             
-            gamepanel.StartCoroutine(gamepanel.RefillGamePanelAt(x_position));
+            //gamepanel.StartCoroutine(gamepanel.RefillGamePanelAt(x_position));
             if (y_position > 0)
                 if (gamepanel.circles_on_panel[x_position, y_position - 1] != null)
                 {
