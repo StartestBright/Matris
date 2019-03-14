@@ -51,13 +51,13 @@ public class GamePanel_Controller : MonoBehaviour {
             bot_2_circle = circles_on_panel[x, y - 2];
 
 
-        if (left_1_circle != null)
+        if (left_1_circle != null &&current_circle!=null)
         {
             if (left_1_circle.CompareTag(current_circle.tag)) //Checking left side match
             {
                 horizontal_match_count++;
 
-                if (left_2_circle != null)
+                if (left_2_circle != null && current_circle != null)
                 {
                     if ((left_2_circle.CompareTag(current_circle.tag)))
                     {
@@ -67,12 +67,12 @@ public class GamePanel_Controller : MonoBehaviour {
             }
         }
 
-        if (right_1_circle != null)
+        if (right_1_circle != null && current_circle != null)
         {
             if ((right_1_circle.CompareTag(current_circle.tag))) //Checking right side match
             {
                 horizontal_match_count++;
-                if (right_2_circle != null)
+                if (right_2_circle != null && current_circle != null)
                 {
                     if ((right_2_circle.CompareTag(current_circle.tag)))
                     {
@@ -83,12 +83,12 @@ public class GamePanel_Controller : MonoBehaviour {
         }
 
 
-        if (top_1_circle != null)
+        if (top_1_circle != null && current_circle != null)
         {
             if (top_1_circle.CompareTag(current_circle.tag)) //Checking top match
             {
                 vertical_match_count++;
-                if (top_2_circle != null)
+                if (top_2_circle != null && current_circle != null)
                 {
                     if (top_2_circle.CompareTag(current_circle.tag))
                     {
@@ -98,12 +98,12 @@ public class GamePanel_Controller : MonoBehaviour {
             }
         }
 
-        if (bot_1_circle != null)
+        if (bot_1_circle != null && current_circle != null)
         {
             if (bot_1_circle.CompareTag(current_circle.tag)) //Checking bottom match
             {
                 vertical_match_count++;
-                if (bot_2_circle != null)
+                if (bot_2_circle != null && current_circle != null)
                 {
                     if (bot_2_circle.CompareTag(current_circle.tag))
                     {
@@ -113,7 +113,7 @@ public class GamePanel_Controller : MonoBehaviour {
             }
         }
 
-        if (left_1_circle != null) //left top and bot square matches check
+        if (left_1_circle != null && current_circle != null) //left top and bot square matches check
         {
 
             if (current_circle.CompareTag(left_1_circle.tag))
@@ -121,12 +121,12 @@ public class GamePanel_Controller : MonoBehaviour {
                 if (current_circle.CompareTag(left_1_circle.tag))
                 {
                     square_match_count++;
-                    if (top_1_circle != null) //left top square match check
+                    if (top_1_circle != null && current_circle != null) //left top square match check
                     {
                         if (current_circle.CompareTag(top_1_circle.tag))
                         {
                             square_match_count++;
-                            if (circles_on_panel[x - 1, y + 1] != null)
+                            if (circles_on_panel[x - 1, y + 1] != null && current_circle != null)
                             {  //can cause PROBLEM INDEX OUT OF ARRAY!!!
                                 if (current_circle.CompareTag(circles_on_panel[x - 1, y + 1].tag))
                                 {
@@ -141,12 +141,12 @@ public class GamePanel_Controller : MonoBehaviour {
                             }
                         }
                     }
-                    if (bot_1_circle != null) //left bot square match check
+                    if (bot_1_circle != null && current_circle != null) //left bot square match check
                     {
                         if (current_circle.CompareTag(bot_1_circle.tag))
                         {
                             square_match_count++;
-                            if (circles_on_panel[x - 1, y - 1] != null)
+                            if (circles_on_panel[x - 1, y - 1] != null && current_circle != null)
                             {
                                 if (current_circle.CompareTag(circles_on_panel[x - 1, y - 1].tag))
                                 {
@@ -168,18 +168,18 @@ public class GamePanel_Controller : MonoBehaviour {
 
 
         }
-        if (right_1_circle != null) //checking right top and bot square matches check
+        if (right_1_circle != null && current_circle != null) //checking right top and bot square matches check
         {
             if (current_circle.CompareTag(right_1_circle.tag)) // right top sqaure match check
             {
                 square_match_count++;
 
-                if (top_1_circle != null)
+                if (top_1_circle != null && current_circle != null)
                 {
                     if (current_circle.CompareTag(top_1_circle.tag))
                     {
                         square_match_count++;
-                        if (circles_on_panel[x + 1, y + 1] != null)
+                        if (circles_on_panel[x + 1, y + 1] != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(circles_on_panel[x + 1, y + 1].tag))
                             {
@@ -195,12 +195,12 @@ public class GamePanel_Controller : MonoBehaviour {
                         }
                     }
                 }
-                if (bot_1_circle != null) // right bot square match check
+                if (bot_1_circle != null && current_circle != null) // right bot square match check
                 {
                     if (current_circle.CompareTag(bot_1_circle.tag))
                     {
                         square_match_count++;
-                        if (circles_on_panel[x + 1, y- 1] != null)
+                        if (circles_on_panel[x + 1, y- 1] != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(circles_on_panel[x + 1, y- 1].tag))
                             {
@@ -224,12 +224,12 @@ public class GamePanel_Controller : MonoBehaviour {
             if (horizontal_match_count >= 3)
             {
                 //there_is_match = true;
-                if (left_1_circle != null)
+                if (left_1_circle != null && current_circle != null)
                 {
                     if (current_circle.CompareTag(left_1_circle.tag))
                     {
                         left_1_circle.GetComponent<Circle>().SetMatch(true);
-                        if (left_2_circle != null)
+                        if (left_2_circle != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(left_2_circle.tag))
                             {
@@ -239,12 +239,12 @@ public class GamePanel_Controller : MonoBehaviour {
                     }
                 }
 
-                if (right_1_circle != null)
+                if (right_1_circle != null && current_circle != null)
                 {
                     if (current_circle.CompareTag(right_1_circle.tag))
                     {
                         right_1_circle.GetComponent<Circle>().SetMatch(true);
-                        if (right_2_circle != null)
+                        if (right_2_circle != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(right_2_circle.tag))
                             {
@@ -259,12 +259,12 @@ public class GamePanel_Controller : MonoBehaviour {
             if (vertical_match_count >= 3)
             {
                 //there_is_match = true;
-                if (top_1_circle != null)
+                if (top_1_circle != null && current_circle != null)
                 {
                     if (current_circle.CompareTag(top_1_circle.tag))
                     {
                         top_1_circle.GetComponent<Circle>().SetMatch(true);
-                        if (top_2_circle != null)
+                        if (top_2_circle != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(top_2_circle.tag))
                             {
@@ -273,12 +273,12 @@ public class GamePanel_Controller : MonoBehaviour {
                         }
                     }
                 }
-                if (bot_1_circle != null)
+                if (bot_1_circle != null && current_circle != null)
                 {
                     if (current_circle.CompareTag(bot_1_circle.tag))
                     {
                         bot_1_circle.GetComponent<Circle>().SetMatch(true);
-                        if (bot_2_circle != null)
+                        if (bot_2_circle != null && current_circle != null)
                         {
                             if (current_circle.CompareTag(bot_2_circle.tag))
                             {
@@ -309,7 +309,50 @@ public class GamePanel_Controller : MonoBehaviour {
             return false;
             
     }
+    /*
+    private void CircleFallingCheck()
+    {
+        for(int i = 0; i < height; i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                int null_count = 0;
+                if (i > 0)
+                {
+                    int temp = i;
+                    
+                    if (circles_on_panel[j,temp]!=null )
+                    {
+                        while (temp > 0)
+                        {
+                            null_count++;
+                            temp--;
+                        }
+                    }
+                    
+                    if(circles_on_panel[j,i]!=null &&null_count>0)
+                        StartCoroutine( CircleFalling(j,i,null_count));
+                }
 
+            }
+        }
+    }
+    */
+    /*
+    private IEnumerator CircleFalling(int x,int y,int nullcount)
+    {
+      
+            while (nullcount > 0 )
+            {
+                yield return new WaitForSeconds(.4f);
+                Debug.Log(circles_on_panel[x, y] + " " + x + " " + y);
+                circles_on_panel[x, y].GetComponent<Circle>().SetPosition(new Vector2(x, y - 1));
+                circles_on_panel[x, y - 1] = circles_on_panel[x, y];
+                circles_on_panel[x, y] = null;
+            }
+        
+    }
+    */
     public void CheckAllMatch()
     {
 
@@ -318,12 +361,34 @@ public class GamePanel_Controller : MonoBehaviour {
             for (int j = 0; j < width; j++)
             {
                 CheckMatchAt(j, i);
-
             }
         }
+        //CircleFallingCheck();
         
     }
-    
+
+
+    private void DestroyMatchAt(int x,int y)
+    {
+        Destroy(circles_on_panel[x, y]);
+        circles_on_panel[x,y] = null;
+        
+    }
+    public void DestroyMatches()
+    {
+        for(int i = 0; i < height; i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                if(circles_on_panel[j,i]!=null)
+                    if(circles_on_panel[j,i].GetComponent<Circle>().getMatched())
+                        DestroyMatchAt(j, i);
+                
+            }
+        }
+    }
+
+
     public void Init()
     {
         circles_on_panel = new GameObject[width, height];
@@ -353,7 +418,6 @@ public class GamePanel_Controller : MonoBehaviour {
                 init_match_checking = false;
                 }
             }
-        
     }
     
 }

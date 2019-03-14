@@ -33,9 +33,26 @@ public class Circle : MonoBehaviour  {
         if (matched)
         {
             SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            spriteRenderer.color = new Color(0, 0, 0);
-            matched = false;
+            //spriteRenderer.color = new Color(24, 131, 22);
+            //matched = false;
             //Debug.Log("matching");
+        }
+
+        if (y_position > 0)
+        {
+            if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
+                //StartCoroutine(CircleFalling());
+                can_fall = true;
+            else
+            {
+                can_fall = false;
+            }
+        }
+
+        if (can_fall)
+        {
+            //StartCoroutine(CircleFalling());
+            CircleFalling();
         }
         
     }
@@ -53,6 +70,7 @@ public class Circle : MonoBehaviour  {
 
             GameObject other_circle = null;
             //Vector2 destination_point = this.transform.position;
+
             if (swipe_angle <= 45 && swipe_angle > -45 && x_position < gamepanel.width - 1) // swipe right
             {
                 other_circle = gamepanel.circles_on_panel[x_position + 1, y_position];
@@ -103,10 +121,7 @@ public class Circle : MonoBehaviour  {
             gamepanel.CheckAllMatch();
             if (other_circle != null)
             {
-                if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
-                {
-                    StartCoroutine(MatchCheckToReturnBack(other_circle));
-                }
+                StartCoroutine(MatchCheckToReturnBack(other_circle));
             }
         }
         
@@ -115,9 +130,10 @@ public class Circle : MonoBehaviour  {
     }
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.3f);
         if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
         {
+            
             //gamepanel.circles_on_panel[x_position,y_position]
             float other_x_origin = other_circle.GetComponent<Circle>().GetPosition().x; //where this circle should go to
             float other_y_origin = other_circle.GetComponent<Circle>().GetPosition().y; //where this circle should go to
@@ -132,6 +148,21 @@ public class Circle : MonoBehaviour  {
             other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
             SetPosition(new Vector2(other_x_origin, other_y_origin));
             
+        }else
+            gamepanel.DestroyMatches();
+    }
+
+    private bool can_fall = false;
+
+    public void CircleFalling()
+    {
+        //yield return new WaitForSeconds(0.3f);
+        if (y_position > 0)
+        if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
+        {
+            gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
+            gamepanel.circles_on_panel[x_position, y_position] = null;
+            y_position -= 1;
         }
     }
    
