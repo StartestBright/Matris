@@ -9,6 +9,7 @@ public class Circle : MonoBehaviour  {
     private float swipe_resist = 5f;
     private GamePanel_Controller gamepanel;
     private bool matched = false;
+    private bool can_fall = false;
     private int horizontal_match_count,vertical_match_count,square_match_count;
     
 
@@ -22,26 +23,16 @@ public class Circle : MonoBehaviour  {
         if(transform.position.x != x_position || transform.position.y != y_position)
         {
             transform.position = Vector2.Lerp(transform.position, new Vector2(x_position, y_position),.4f);
-            //transform.position = new Vector2(x_position, y_position);
-
-            //Mathf.Lerp(transform.position.x,x_position, 0.4f);
-            //Mathf.Lerp(transform.position.y,y_position, 0.4f);
         }
-
-        //transform.name = "( " + x_position + ", " + y_position + " )";
-
+        
         if (matched)
         {
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            //spriteRenderer.color = new Color(24, 131, 22);
-            //matched = false;
-            //Debug.Log("matching");
+            gamepanel.DestroyMatchAt(x_position, y_position);
         }
 
         if (y_position > 0)
         {
             if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
-                //StartCoroutine(CircleFalling());
                 can_fall = true;
             else
             {
@@ -51,7 +42,6 @@ public class Circle : MonoBehaviour  {
 
         if (can_fall)
         {
-            //StartCoroutine(CircleFalling());
             CircleFalling();
         }
         
@@ -86,7 +76,6 @@ public class Circle : MonoBehaviour  {
             {
                 other_circle = gamepanel.circles_on_panel[x_position, y_position - 1];
                 other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
-
                 //swapping circles in the array in the game panel
                 gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
                 gamepanel.circles_on_panel[x_position, y_position] = other_circle;
@@ -106,7 +95,7 @@ public class Circle : MonoBehaviour  {
             }
             else if (swipe_angle < 135 && swipe_angle > 45 && y_position < gamepanel.height) //swipe top
             {
-
+              
 
                 other_circle = gamepanel.circles_on_panel[x_position, y_position + 1];
 
@@ -131,6 +120,7 @@ public class Circle : MonoBehaviour  {
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
         yield return new WaitForSeconds(0.3f);
+        if(other_circle!=null)//if it is not already matched so destroied
         if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
         {
             
@@ -148,22 +138,28 @@ public class Circle : MonoBehaviour  {
             other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
             SetPosition(new Vector2(other_x_origin, other_y_origin));
             
-        }else
-            gamepanel.DestroyMatches();
+        }//else
+             //StartCoroutine( gamepanel.DestroyMatches() );
     }
 
-    private bool can_fall = false;
 
     public void CircleFalling()
     {
-        //yield return new WaitForSeconds(0.3f);
-        if (y_position > 0)
-        if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
-        {
-            gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
-            gamepanel.circles_on_panel[x_position, y_position] = null;
-            y_position -= 1;
-        }
+        if (y_position > 0) { 
+            if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
+            {
+                gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
+                gamepanel.circles_on_panel[x_position, y_position] = null;
+                y_position -= 1;
+            }
+            
+            gamepanel.StartCoroutine(gamepanel.RefillGamePanelAt(x_position));
+            if (y_position > 0)
+                if (gamepanel.circles_on_panel[x_position, y_position - 1] != null)
+                {
+                    gamepanel.CheckAllMatch();
+                }
+            }
     }
    
 

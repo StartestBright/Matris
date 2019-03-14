@@ -18,7 +18,6 @@ public class GamePanel_Controller : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
 	}
 
     
@@ -366,12 +365,34 @@ public class GamePanel_Controller : MonoBehaviour {
         //CircleFallingCheck();
         
     }
+    public IEnumerator RefillGamePanelAt(int x_position)
+    {
+       
+        if (circles_on_panel[x_position, height - 1] == null)
+        { 
+            GameObject random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
+            circles_on_panel[x_position, height - 1] = random_type_circle;
+            while (CheckMatchAt(x_position, height - 1))
+            {
+                random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
+                circles_on_panel[x_position, height - 1] = random_type_circle;
+            }
+            GameObject new_circle = GameObject.Instantiate(random_type_circle, new Vector2(x_position, height - 1), Quaternion.identity) as GameObject;
+            new_circle.transform.parent = this.transform;
+            new_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, height - 1));
+            circles_on_panel[x_position, height - 1] = new_circle;
+
+        }
+        CheckAllMatch(); // To check if there are matches after destroy and refill the circles
+        yield return new WaitForSeconds(.2f);
+    }
 
 
-    private void DestroyMatchAt(int x,int y)
+    public void DestroyMatchAt(int x,int y)
     {
         Destroy(circles_on_panel[x, y]);
         circles_on_panel[x,y] = null;
+        RefillGamePanelAt(x);
         
     }
     public void DestroyMatches()
@@ -380,9 +401,11 @@ public class GamePanel_Controller : MonoBehaviour {
         {
             for(int j = 0; j < width; j++)
             {
-                if(circles_on_panel[j,i]!=null)
-                    if(circles_on_panel[j,i].GetComponent<Circle>().getMatched())
+                if (circles_on_panel[j, i] != null)
+                    if (circles_on_panel[j, i].GetComponent<Circle>().getMatched())
+                    {
                         DestroyMatchAt(j, i);
+                    }
                 
             }
         }
