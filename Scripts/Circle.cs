@@ -6,7 +6,7 @@ public class Circle : MonoBehaviour  {
     int x_position, y_position;
     private Vector2 touch_position, release_position;
     private float swipe_angle=0;
-    private float swipe_resist = 5f;
+    private float swipe_resist = 2f;
     private GamePanel_Controller gamepanel;
     private bool matched = false;
     private bool can_fall = false;
@@ -22,7 +22,7 @@ public class Circle : MonoBehaviour  {
 	void Update () {
         if(transform.position.x != x_position || transform.position.y != y_position)
         {
-            transform.position = Vector2.Lerp(transform.position, new Vector2(x_position, y_position),.4f);
+            transform.position = Vector2.Lerp(transform.position, new Vector2(x_position, y_position),.2f);
         }
         
         if (matched)
@@ -55,75 +55,79 @@ public class Circle : MonoBehaviour  {
     }
     private void OnMouseUp()
     {
-        release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
-        swipe_angle= Mathf.Atan2((release_position.y - touch_position.y) , (release_position.x - touch_position.x))/Mathf.PI *180;
-
-        if (Mathf.Abs(release_position.x - touch_position.x) > swipe_resist || Mathf.Abs(release_position.y - touch_position.y) > swipe_resist)
+        if (gamepanel.getCanMove())
         {
+            gamepanel.setCanMove(false);
+            release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
+            swipe_angle = Mathf.Atan2((release_position.y - touch_position.y), (release_position.x - touch_position.x)) / Mathf.PI * 180;
 
-            GameObject other_circle = null;
-            //Vector2 destination_point = this.transform.position;
-
-            if (swipe_angle <= 45 && swipe_angle > -45 && x_position < gamepanel.width - 1) // swipe right
+            if (Mathf.Abs(release_position.x - touch_position.x) > swipe_resist || Mathf.Abs(release_position.y - touch_position.y) > swipe_resist)
             {
-                other_circle = gamepanel.circles_on_panel[x_position + 1, y_position];
-                other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
 
-                //swapping circles in the array in the game panel
-                gamepanel.circles_on_panel[x_position + 1, y_position] = gamepanel.circles_on_panel[x_position, y_position];
-                gamepanel.circles_on_panel[x_position, y_position] = other_circle;
+                GameObject other_circle = null;
+                //Vector2 destination_point = this.transform.position;
 
-                this.x_position += 1;
+                if (swipe_angle <= 45 && swipe_angle > -45 && x_position < gamepanel.width - 1) // swipe right
+                {
+                    other_circle = gamepanel.circles_on_panel[x_position + 1, y_position];
+                    other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
+
+                    //swapping circles in the array in the game panel
+                    gamepanel.circles_on_panel[x_position + 1, y_position] = gamepanel.circles_on_panel[x_position, y_position];
+                    gamepanel.circles_on_panel[x_position, y_position] = other_circle;
+
+                    this.x_position += 1;
+                }
+                else if (swipe_angle <= -45 && swipe_angle > -135 && y_position > 0) //swipe bottom
+                {
+                    other_circle = gamepanel.circles_on_panel[x_position, y_position - 1];
+                    other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
+                    //swapping circles in the array in the game panel
+                    gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
+                    gamepanel.circles_on_panel[x_position, y_position] = other_circle;
+
+                    this.y_position -= 1;
+                }
+                else if (swipe_angle >= Mathf.Abs(135) && x_position > 0) //swipe left
+                {
+                    other_circle = gamepanel.circles_on_panel[x_position - 1, y_position];
+                    other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
+
+                    //swapping circles in the array in the game panel
+                    gamepanel.circles_on_panel[x_position - 1, y_position] = gamepanel.circles_on_panel[x_position, y_position];
+                    gamepanel.circles_on_panel[x_position, y_position] = other_circle;
+
+                    this.x_position -= 1;
+                }
+                else if (swipe_angle < 135 && swipe_angle > 45 && y_position < gamepanel.height) //swipe top
+                {
+
+
+                    other_circle = gamepanel.circles_on_panel[x_position, y_position + 1];
+
+                    //swapping circles in the array in the game panel
+                    gamepanel.circles_on_panel[x_position, y_position + 1] = gamepanel.circles_on_panel[x_position, y_position];
+                    gamepanel.circles_on_panel[x_position, y_position] = other_circle;
+
+                    other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
+                    this.y_position += 1;
+                }
+
+                gamepanel.CheckAllMatch();
+                if (other_circle != null)
+                {
+                    StartCoroutine(MatchCheckToReturnBack(other_circle));
+                }
             }
-            else if (swipe_angle <= -45 && swipe_angle > -135 && y_position > 0) //swipe bottom
-            {
-                other_circle = gamepanel.circles_on_panel[x_position, y_position - 1];
-                other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
-                //swapping circles in the array in the game panel
-                gamepanel.circles_on_panel[x_position, y_position - 1] = gamepanel.circles_on_panel[x_position, y_position];
-                gamepanel.circles_on_panel[x_position, y_position] = other_circle;
 
-                this.y_position -= 1;
-            }
-            else if (swipe_angle >= Mathf.Abs(135) && x_position > 0) //swipe left
-            {
-                other_circle = gamepanel.circles_on_panel[x_position - 1, y_position];
-                other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
-
-                //swapping circles in the array in the game panel
-                gamepanel.circles_on_panel[x_position - 1, y_position] = gamepanel.circles_on_panel[x_position, y_position];
-                gamepanel.circles_on_panel[x_position, y_position] = other_circle;
-
-                this.x_position -= 1;
-            }
-            else if (swipe_angle < 135 && swipe_angle > 45 && y_position < gamepanel.height) //swipe top
-            {
-              
-
-                other_circle = gamepanel.circles_on_panel[x_position, y_position + 1];
-
-                //swapping circles in the array in the game panel
-                gamepanel.circles_on_panel[x_position, y_position + 1] = gamepanel.circles_on_panel[x_position, y_position];
-                gamepanel.circles_on_panel[x_position, y_position] = other_circle;
-
-                other_circle.GetComponent<Circle>().SetPosition(new Vector2(x_position, y_position));
-                this.y_position += 1;
-            }
-
-            gamepanel.CheckAllMatch();
-            if (other_circle != null)
-            {
-                StartCoroutine(MatchCheckToReturnBack(other_circle));
-            }
         }
-        
-
         
     }
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
         yield return new WaitForSeconds(0.3f);
-        if (other_circle != null)//if it is not already matched so destroied
+        if (other_circle != null)
+        {//if it is not already matched so destroied
             if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
             {
 
@@ -140,14 +144,24 @@ public class Circle : MonoBehaviour  {
 
                 other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
                 SetPosition(new Vector2(other_x_origin, other_y_origin));
+
+                yield return new WaitForSeconds(.2f); //wait for 0.4 secs to move circles again
+                gamepanel.setCanMove(true);
             }
             else
             {
+                yield return new WaitForSeconds(.5f); //wait for 0.4 secs to move circles again
+                gamepanel.setCanMove(true);
                 gamepanel.DestroyMatches();
                 gamepanel.RefillGamePanel();
             }
-    }
+            
+        }
 
+
+    }
+   
+   
 
     public void CircleFalling()
     {
