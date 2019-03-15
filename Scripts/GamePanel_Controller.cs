@@ -14,7 +14,8 @@ public class GamePanel_Controller : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Init();
-	}
+        CheckToShuffle();
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -222,6 +223,7 @@ public class GamePanel_Controller : MonoBehaviour {
         {
             if (horizontal_match_count >= 3)
             {
+
                 //there_is_match = true;
                 if (left_1_circle != null && current_circle != null)
                 {
@@ -303,55 +305,15 @@ public class GamePanel_Controller : MonoBehaviour {
         if ((horizontal_match_count >= 3 || vertical_match_count >= 3 || square_match_count >= 4))
         {
             return true;
+
         }
         else
+        {
             return false;
+        }
             
     }
-    /*
-    private void CircleFallingCheck()
-    {
-        for(int i = 0; i < height; i++)
-        {
-            for(int j = 0; j < width; j++)
-            {
-                int null_count = 0;
-                if (i > 0)
-                {
-                    int temp = i;
-                    
-                    if (circles_on_panel[j,temp]!=null )
-                    {
-                        while (temp > 0)
-                        {
-                            null_count++;
-                            temp--;
-                        }
-                    }
-                    
-                    if(circles_on_panel[j,i]!=null &&null_count>0)
-                        StartCoroutine( CircleFalling(j,i,null_count));
-                }
-
-            }
-        }
-    }
-    */
-    /*
-    private IEnumerator CircleFalling(int x,int y,int nullcount)
-    {
-      
-            while (nullcount > 0 )
-            {
-                yield return new WaitForSeconds(.4f);
-                Debug.Log(circles_on_panel[x, y] + " " + x + " " + y);
-                circles_on_panel[x, y].GetComponent<Circle>().SetPosition(new Vector2(x, y - 1));
-                circles_on_panel[x, y - 1] = circles_on_panel[x, y];
-                circles_on_panel[x, y] = null;
-            }
-        
-    }
-    */
+   
     public void setCanMove(bool can)
     {
         can_move = can;
@@ -371,8 +333,9 @@ public class GamePanel_Controller : MonoBehaviour {
         return match_exists;
         
     }
-    public void RefillGamePanel() //after swap -> destroy all matches -> Refill
+    public void RefillGamePanel() 
     {
+
         for (int i = 0; i < width; i++)
         {
             int refill_count = 0;
@@ -428,6 +391,7 @@ public class GamePanel_Controller : MonoBehaviour {
         {
             RefillGamePanel();
         }
+        
     }
     
 
@@ -457,7 +421,158 @@ public class GamePanel_Controller : MonoBehaviour {
     {
         return can_move;
     }
+    private bool CheckMatchExist() //Check if there are circles can match 3
+    {
+        for(int i = 0; i < height; i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                init_match_checking = true;
+                GameObject current_circle = circles_on_panel[j, i];
+                GameObject other_circle;
+                string other_circle_origin_tag=null;
+                string current_circle_origin_tag = null;
 
+                if (current_circle.GetComponent<Circle>().GetPosition().x > 0) //check left
+                {
+                    other_circle = circles_on_panel[j - 1, i];
+                    other_circle_origin_tag = other_circle.tag; //new String?
+                    current_circle_origin_tag = current_circle.tag;
+
+                    other_circle.tag = current_circle.tag;
+                    current_circle.tag = other_circle_origin_tag;
+
+                    if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+                    {
+                        other_circle.tag = other_circle_origin_tag;
+                        current_circle.tag =  current_circle_origin_tag;
+                        init_match_checking = false;
+                        return true;
+                    }
+                    other_circle.tag = other_circle_origin_tag;
+                    current_circle.tag = current_circle_origin_tag;
+                }
+                if (current_circle.GetComponent<Circle>().GetPosition().y < height - 1)
+                { //check top
+                    other_circle = circles_on_panel[j, i+1];
+                    other_circle_origin_tag = other_circle.tag; //new String?
+                    current_circle_origin_tag = current_circle.tag;
+
+                    other_circle.tag =  current_circle.tag;
+                    current_circle.tag =  other_circle_origin_tag;
+
+                    if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+                    {
+                        other_circle.tag = other_circle_origin_tag;
+                        current_circle.tag = current_circle_origin_tag;
+                        init_match_checking = false;
+                        return true;
+                    }
+                    other_circle.tag = other_circle_origin_tag;
+                    current_circle.tag = current_circle_origin_tag;
+                }
+
+                if (current_circle.GetComponent<Circle>().GetPosition().x < width-1)
+                { //check right
+                    other_circle = circles_on_panel[j+1, i];
+                    other_circle_origin_tag =  other_circle.tag; //new String?
+                    current_circle_origin_tag =  current_circle.tag;
+
+                    other_circle.tag =  current_circle.tag;
+                    current_circle.tag =other_circle_origin_tag;
+
+                    if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+                    {
+                        other_circle.tag = other_circle_origin_tag;
+                        current_circle.tag =  current_circle_origin_tag;
+                        init_match_checking = false;
+                        return true;
+                    }
+                    other_circle.tag = other_circle_origin_tag;
+                    current_circle.tag = current_circle_origin_tag;
+                }
+                if (current_circle.GetComponent<Circle>().GetPosition().y>0)
+                { //check bot
+                    other_circle = circles_on_panel[j, i-1];
+                    other_circle_origin_tag =  other_circle.tag; //new String?
+                    current_circle_origin_tag =  current_circle.tag;
+
+                    other_circle.tag =  current_circle.tag;
+                    current_circle.tag =  other_circle_origin_tag;
+
+                    if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+                    {
+                        other_circle.tag =  other_circle_origin_tag;
+                        current_circle.tag =  current_circle_origin_tag;
+                        init_match_checking = false;
+                        return true;
+                    }
+                    other_circle.tag = other_circle_origin_tag;
+                    current_circle.tag = current_circle_origin_tag;
+                }
+            }
+        }
+        init_match_checking = false;
+        return false;
+    }
+
+    public void CheckToShuffle()
+    {
+        bool match_exist = CheckMatchExist();
+        Debug.Log(match_exist);
+        while (!match_exist)
+        {
+            for(int i = 0; i < height; i++)
+            {
+                for(int j = 0; j < width; j++)
+                {
+                    //if (circles_on_panel[j, i] != null)
+                    {
+                        circles_on_panel[j, i].GetComponent<Circle>().SetPosition(new Vector2(width / 2, height / 2));
+                        //circles_on_panel[j,i]
+
+                    } 
+                    //yield return new WaitForSeconds(0.01f);
+                }
+            }
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    DestroyMatchAt(j, i);
+                    circles_on_panel[j, i] = null;
+                }
+            }
+
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    init_match_checking = true;
+                    GameObject random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
+                    circles_on_panel[j, i] = random_type_circle;
+                    while (CheckMatchAt(j, i))
+                    {
+                        random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
+                        circles_on_panel[j, i] = random_type_circle;
+                    }
+                    GameObject new_circle = GameObject.Instantiate(random_type_circle, new Vector2(width / 2, height / 2), Quaternion.identity) as GameObject;
+                    new_circle.transform.parent = this.transform;
+                    new_circle.GetComponent<Circle>().SetPosition(new Vector2(j, i));
+                    circles_on_panel[j, i] = new_circle;
+                    init_match_checking = false;
+                    //yield return new WaitForSeconds(0.01f);
+                }
+            }
+            //yield return new WaitForSeconds(0.02f);
+
+            match_exist = CheckMatchExist();
+            Debug.Log(match_exist);
+        }
+
+    }
 
     public void Init()
     {

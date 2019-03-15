@@ -55,8 +55,8 @@ public class Circle : MonoBehaviour  {
     }
     private void OnMouseUp()
     {
-        if (gamepanel.getCanMove())
-        {
+        //if (gamepanel.getCanMove())
+        //{
             gamepanel.setCanMove(false);
             release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
             swipe_angle = Mathf.Atan2((release_position.y - touch_position.y), (release_position.x - touch_position.x)) / Mathf.PI * 180;
@@ -120,15 +120,16 @@ public class Circle : MonoBehaviour  {
                 }
             }
 
-        }
+        //}
         
     }
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
         yield return new WaitForSeconds(0.3f);
+        Debug.Log("return called");
         if (other_circle != null)
         {//if it is not already matched so destroied
-            if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false)
+            if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false) //Did not match
             {
 
                 //gamepanel.circles_on_panel[x_position,y_position]
@@ -145,22 +146,27 @@ public class Circle : MonoBehaviour  {
                 other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
                 SetPosition(new Vector2(other_x_origin, other_y_origin));
 
-                yield return new WaitForSeconds(.2f); //wait for 0.4 secs to move circles again
+                //yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
                 gamepanel.setCanMove(true);
+                Debug.Log("not match");
             }
-            else
+            else //If matched
             {
-                yield return new WaitForSeconds(.5f); //wait for 0.4 secs to move circles again
-                gamepanel.setCanMove(true);
+                Debug.Log("matched");
+                yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
+                //gamepanel.setCanMove(true);
                 gamepanel.DestroyMatches();
                 gamepanel.RefillGamePanel();
+                gamepanel.CheckToShuffle();
             }
-            
-        }
+            //yield return new WaitForSeconds(0.5f);
+            //yield return new WaitForSeconds(.4f);
+            //StartCoroutine(gamepanel.CheckToShuffle());
 
+        }
+       
 
     }
-   
    
 
     public void CircleFalling()
