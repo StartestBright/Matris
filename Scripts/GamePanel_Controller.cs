@@ -1,25 +1,55 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GamePanel_Controller : MonoBehaviour {
+    private bool game_over = false;
+    private bool mission_clear = false;
     private bool init_match_checking = true;
     private bool can_move = true;
+    private int move_left;
+    private int goal1_left, goal2_left, goal3_left;
+    private Color[] picked_goal_color;
+    private GameObject[,] tiles;
+    int[] type_index;
+
     public int width, height;
     public GameObject background_tile;
     public GameObject[] circle_types;
     public GameObject[,] circles_on_panel;
+
+    
     
 
-    // Use this for initialization
+    public Text move_left_text;
+    public Image goal1, goal2, goal3;
+    public Text game_over_text;
+    public Button restart_bt;
+   
     void Start () {
         Init();
         CheckToShuffle();
     }
 	
-	// Update is called once per frame
 	void Update () {
-	}
+        goal1.GetComponentInChildren<Text>().text = "" + goal1_left;
+        goal2.GetComponentInChildren<Text>().text = "" + goal2_left;
+        goal3.GetComponentInChildren<Text>().text = "" + goal3_left;
+        move_left_text.text = "Move left: " + move_left;
+
+        if (game_over)
+        {
+            if (mission_clear)
+                game_over_text.text = "Great! Mission Clear!";
+            else
+                game_over_text.text = "Game Over";
+            game_over_text.enabled = true;
+            restart_bt.enabled = true;
+            restart_bt.GetComponentInChildren<Text>().enabled = true;
+            restart_bt.GetComponentInChildren<Image>().enabled = true;
+        }
+    }
 
     
 
@@ -386,7 +416,7 @@ public class GamePanel_Controller : MonoBehaviour {
         }
         //Checking matches again after refill then destroy and refill if match exists
         bool match_exist = CheckAllMatch();
-        DestroyMatches();
+        DestroyMatches(true);
         if (match_exist)
         {
             RefillGamePanel();
@@ -395,14 +425,16 @@ public class GamePanel_Controller : MonoBehaviour {
     }
     
 
-    public void DestroyMatchAt(int x,int y)
+    public void DestroyMatchAt(int x,int y,bool shuffle)
     {
+        if(!shuffle)
+            ReduceGoal(circles_on_panel[x, y].tag);
         Destroy(circles_on_panel[x, y]);
         circles_on_panel[x,y] = null;
         //RefillGamePanelAt(x);
         
     }
-    public void DestroyMatches()
+    public void DestroyMatches(bool shuffle)
     {
         for(int i = 0; i < height; i++)
         {
@@ -411,7 +443,7 @@ public class GamePanel_Controller : MonoBehaviour {
                 if (circles_on_panel[j, i] != null)
                     if (circles_on_panel[j, i].GetComponent<Circle>().getMatched())
                     {
-                        DestroyMatchAt(j, i);
+                        DestroyMatchAt(j, i,shuffle);
                     }
                 
             }
@@ -519,7 +551,6 @@ public class GamePanel_Controller : MonoBehaviour {
     public void CheckToShuffle()
     {
         bool match_exist = CheckMatchExist();
-        Debug.Log(match_exist);
         while (!match_exist)
         {
             for(int i = 0; i < height; i++)
@@ -540,7 +571,7 @@ public class GamePanel_Controller : MonoBehaviour {
             {
                 for (int j = 0; j < width; j++)
                 {
-                    DestroyMatchAt(j, i);
+                    DestroyMatchAt(j, i,true);
                     circles_on_panel[j, i] = null;
                 }
             }
@@ -569,14 +600,129 @@ public class GamePanel_Controller : MonoBehaviour {
             //yield return new WaitForSeconds(0.02f);
 
             match_exist = CheckMatchExist();
-            Debug.Log(match_exist);
         }
 
     }
 
+    public void ReduceGoal(string matched_tag)
+    {
+        string[] t = new string[3];
+        t[0] = circle_types[type_index[0]].tag;
+        t[1] = circle_types[type_index[1]].tag;
+        t[2] = circle_types[type_index[2]].tag;
+
+        if (t[0].Equals(matched_tag)) 
+        {
+            goal1_left--;
+            if (goal1_left <= 0)
+                goal1_left = 0;
+        }
+        if (t[1].Equals(matched_tag)) 
+        {
+            goal2_left--;
+            if (goal2_left <= 0)
+                goal2_left = 0;
+        }
+        if (t[2].Equals(matched_tag)) 
+        {
+            goal3_left--;
+            if (goal3_left <= 0)
+                goal3_left = 0;
+        }
+    }
+    public void Move()
+    {
+        move_left--;
+        if (move_left <= 0)
+        {
+            move_left = 0;
+            game_over = true;
+        }
+    }
+    public bool IsGameOver()
+    {
+        return game_over;
+    }
+    
     public void Init()
     {
+        if (circles_on_panel != null)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    if (circles_on_panel[j, i] != null)
+                    {
+                        Destroy(circles_on_panel[j, i]);
+                        circles_on_panel[j, i] = null;
+                    }
+                }
+            }
+        }
+
+        game_over_text.enabled = false;
+        restart_bt.enabled = false;
+        restart_bt.GetComponentInChildren<Image>().enabled = false;
+        restart_bt.GetComponentInChildren<Text>().enabled = false;
+        picked_goal_color = new Color[3];
+        type_index = new int[3];
+        
+
+        for (int i = 0; i < 3; i++)
+        {
+            type_index[i] = Random.Range(0, circle_types.Length);
+            Color temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
+            bool already_picked = false;
+            for (int j = 0; j < picked_goal_color.Length; j++)
+            {
+                if (picked_goal_color[j] == temp)
+                {
+                    already_picked = true;
+                }
+            }
+            while (already_picked)
+            {
+                already_picked = false;
+                type_index[i] = Random.Range(0, circle_types.Length);
+                temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
+                for (int j = 0; j < picked_goal_color.Length; j++)
+                {
+                    if (picked_goal_color[j] == temp)
+                    {
+                        already_picked = true;
+                    }
+                }
+            }
+            picked_goal_color[i] = temp;
+        }
+
+
+
+        move_left = Random.Range(20, 25);
+        move_left_text.text = "Move left: " + move_left;
+        goal1_left = Random.Range(15, 25);
+        goal1.GetComponent<Image>().color = picked_goal_color[0];
+        goal2.GetComponent<Image>().color = picked_goal_color[1];
+        goal3.GetComponent<Image>().color = picked_goal_color[2];
+        goal2_left = Random.Range(15, 25);
+        goal3_left = Random.Range(15, 25);
+
+        game_over = false;
+
         circles_on_panel = new GameObject[width, height];
+        if (tiles != null)
+        {
+            for(int i = 0; i < height; i++)
+            {
+                for(int j = 0; j < width; j++)
+                {
+                    Destroy(tiles[j, i]);
+                    tiles[j, i] = null;
+                }
+            }
+        }
+        tiles = new GameObject[width, height];
 
         
         
@@ -585,10 +731,11 @@ public class GamePanel_Controller : MonoBehaviour {
                 for (int j = 0; j < width; j++)
                 {
                     init_match_checking = true;
-                    GameObject temp_tile = GameObject.Instantiate(background_tile, new Vector3(j, i, 0.1f), Quaternion.identity) as GameObject;
-                    temp_tile.transform.parent = this.transform;
-                    temp_tile.name = "(" + j + " ," + i + ")";
-
+                    
+                        GameObject temp_tile = GameObject.Instantiate(background_tile, new Vector3(j, i, 0.1f), Quaternion.identity) as GameObject;
+                        tiles[j, i] = temp_tile;
+                        temp_tile.transform.parent = this.transform;
+                        temp_tile.name = "(" + j + " ," + i + ")";
                     GameObject random_type_circle = circle_types[Random.Range(0, circle_types.Length)];
                     circles_on_panel[j, i] = random_type_circle;
                     while (CheckMatchAt(j, i))

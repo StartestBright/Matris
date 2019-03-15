@@ -55,8 +55,10 @@ public class Circle : MonoBehaviour  {
     }
     private void OnMouseUp()
     {
-        //if (gamepanel.getCanMove())
-        //{
+        if (!gamepanel.IsGameOver())
+        {
+            //if (gamepanel.getCanMove())
+            //{
             gamepanel.setCanMove(false);
             release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
             swipe_angle = Mathf.Atan2((release_position.y - touch_position.y), (release_position.x - touch_position.x)) / Mathf.PI * 180;
@@ -119,14 +121,13 @@ public class Circle : MonoBehaviour  {
                     StartCoroutine(MatchCheckToReturnBack(other_circle));
                 }
             }
-
-        //}
-        
+            gamepanel.Move();
+            //}
+        }
     }
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
         yield return new WaitForSeconds(0.3f);
-        Debug.Log("return called");
         if (other_circle != null)
         {//if it is not already matched so destroied
             if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false) //Did not match
@@ -148,14 +149,13 @@ public class Circle : MonoBehaviour  {
 
                 //yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
                 gamepanel.setCanMove(true);
-                Debug.Log("not match");
+
             }
             else //If matched
             {
-                Debug.Log("matched");
                 yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
                 //gamepanel.setCanMove(true);
-                gamepanel.DestroyMatches();
+                gamepanel.DestroyMatches(false);
                 gamepanel.RefillGamePanel();
                 gamepanel.CheckToShuffle();
             }
