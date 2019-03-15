@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Circle : MonoBehaviour  {
     int x_position, y_position;
@@ -30,6 +31,7 @@ public class Circle : MonoBehaviour  {
             SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(44, 11, 35);
             //gamepanel.DestroyMatchAt(x_position, y_position);
+            
         }
         /*
         if (y_position > 0)
@@ -47,7 +49,18 @@ public class Circle : MonoBehaviour  {
             CircleFalling();
         }
         */
+
         
+        if (gamepanel.GetMatchHintOn())
+        {
+            if (gamepanel.CheckMatchExistAt(x_position, y_position))
+            {
+                GetComponent<Animator>().SetBool("match_hint", true);
+            }
+
+        }else
+            GetComponent<Animator>().SetBool("match_hint", false);
+
     }
     private void OnMouseDown()
     {
@@ -57,8 +70,8 @@ public class Circle : MonoBehaviour  {
     {
         if (!gamepanel.IsGameOver())
         {
-            //if (gamepanel.getCanMove())
-            //{
+            if (gamepanel.getCanMove())
+            {
             gamepanel.setCanMove(false);
             release_position = Camera.main.WorldToScreenPoint(Input.mousePosition);
             swipe_angle = Mathf.Atan2((release_position.y - touch_position.y), (release_position.x - touch_position.x)) / Mathf.PI * 180;
@@ -121,13 +134,14 @@ public class Circle : MonoBehaviour  {
                     StartCoroutine(MatchCheckToReturnBack(other_circle));
                 }
             }
-            gamepanel.Move();
-            //}
+            
+            }
         }
     }
     private IEnumerator MatchCheckToReturnBack(GameObject other_circle)
     {
-        yield return new WaitForSeconds(0.3f);
+        gamepanel.Move();
+        yield return new WaitForSeconds(0.3f);        
         if (other_circle != null)
         {//if it is not already matched so destroied
             if (matched == false && other_circle.GetComponent<Circle>().getMatched() == false) //Did not match
@@ -147,17 +161,21 @@ public class Circle : MonoBehaviour  {
                 other_circle.GetComponent<Circle>().SetPosition(new Vector2(GetPosition().x, GetPosition().y));
                 SetPosition(new Vector2(other_x_origin, other_y_origin));
 
-                //yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
+                yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
                 gamepanel.setCanMove(true);
 
             }
             else //If matched
             {
+                if (transform.parent.tag == "Sub_Board")
+                    SceneManager.LoadScene("Main");
                 yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
                 //gamepanel.setCanMove(true);
                 gamepanel.DestroyMatches(false);
                 gamepanel.RefillGamePanel();
                 gamepanel.CheckToShuffle();
+
+                
             }
             //yield return new WaitForSeconds(0.5f);
             //yield return new WaitForSeconds(.4f);

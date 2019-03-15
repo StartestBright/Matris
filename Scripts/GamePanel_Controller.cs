@@ -8,10 +8,20 @@ public class GamePanel_Controller : MonoBehaviour {
     private bool mission_clear = false;
     private bool init_match_checking = true;
     private bool can_move = true;
+    private bool match_hint_on = false;
+
     private int move_left;
     private int goal1_left, goal2_left, goal3_left;
     private Color[] picked_goal_color;
     private GameObject[,] tiles;
+    private AudioSource matching_sound;
+    private AudioSource shuffle_sound;
+    private AudioSource bgm;
+    private float bug_fix_timer=0;
+    private float match_hint_timer = 0;
+    private float match_hink_timer_delay = 5f;
+
+
     int[] type_index;
 
     public int width, height;
@@ -27,34 +37,64 @@ public class GamePanel_Controller : MonoBehaviour {
     public Text game_over_text;
     public Button restart_bt;
    
+
+
     void Start () {
+        
+        matching_sound = GetComponents<AudioSource>()[0];
+        if (transform.tag != "Sub_Board")
+        {
+            shuffle_sound = GetComponents<AudioSource>()[1];
+            bgm = GetComponents<AudioSource>()[2];
+            if (bgm != null)
+                bgm.Play();
+        }
         Init();
         CheckToShuffle();
     }
 	
 	void Update () {
-        goal1.GetComponentInChildren<Text>().text = "" + goal1_left;
-        goal2.GetComponentInChildren<Text>().text = "" + goal2_left;
-        goal3.GetComponentInChildren<Text>().text = "" + goal3_left;
-        move_left_text.text = "Move left: " + move_left;
-
-        if (game_over)
+        if (transform.tag != "Sub_Board")
         {
-            if (mission_clear)
-                game_over_text.text = "Great! Mission Clear!";
-            else
-                game_over_text.text = "Game Over";
-            game_over_text.enabled = true;
-            restart_bt.enabled = true;
-            restart_bt.GetComponentInChildren<Text>().enabled = true;
-            restart_bt.GetComponentInChildren<Image>().enabled = true;
+            goal1.GetComponentInChildren<Text>().text = "" + goal1_left;
+            goal2.GetComponentInChildren<Text>().text = "" + goal2_left;
+            goal3.GetComponentInChildren<Text>().text = "" + goal3_left;
+            move_left_text.text = "Move left: " + move_left;
+
+            if (game_over)
+            {
+                if (mission_clear)
+                    game_over_text.text = "Great! Mission Clear!";
+                else
+                    game_over_text.text = "Game Over";
+                game_over_text.enabled = true;
+                restart_bt.enabled = true;
+                restart_bt.GetComponentInChildren<Text>().enabled = true;
+                restart_bt.GetComponentInChildren<Image>().enabled = true;
+            }
         }
+            bug_fix_timer += Time.deltaTime;
+            if (bug_fix_timer > 2f)
+            {
+                setCanMove(true);
+            }
+
+        match_hint_timer += Time.deltaTime;
+        if (match_hint_timer > match_hink_timer_delay)
+        {
+            match_hint_on = true;
+        }
+        else
+            match_hint_on = false;
+       
+        
     }
 
     
 
     private bool CheckMatchAt(int x,int y)
     {
+        
         int horizontal_match_count = 1;
         int vertical_match_count = 1;
         int square_match_count = 1;
@@ -360,12 +400,13 @@ public class GamePanel_Controller : MonoBehaviour {
                     match_exists = true;
             }
         }
+        bug_fix_timer = 0;
         return match_exists;
         
     }
     public void RefillGamePanel() 
     {
-
+        
         for (int i = 0; i < width; i++)
         {
             int refill_count = 0;
@@ -431,8 +472,12 @@ public class GamePanel_Controller : MonoBehaviour {
             ReduceGoal(circles_on_panel[x, y].tag);
         Destroy(circles_on_panel[x, y]);
         circles_on_panel[x,y] = null;
+        if(!shuffle)
+            matching_sound.Play();
         //RefillGamePanelAt(x);
+        match_hint_timer = 0;
         
+
     }
     public void DestroyMatches(bool shuffle)
     {
@@ -448,12 +493,103 @@ public class GamePanel_Controller : MonoBehaviour {
                 
             }
         }
+        setCanMove(true);
+        match_hint_timer = 0;
     }
     public bool getCanMove()
     {
         return can_move;
     }
-    private bool CheckMatchExist() //Check if there are circles can match 3
+    public bool CheckMatchExistAt(int j,int i)
+    {
+        init_match_checking = true;
+        GameObject current_circle = circles_on_panel[j, i];
+        GameObject other_circle;
+        string other_circle_origin_tag = null;
+        string current_circle_origin_tag = null;
+
+        if (current_circle.GetComponent<Circle>().GetPosition().x > 0) //check left
+        {
+            other_circle = circles_on_panel[j - 1, i];
+            other_circle_origin_tag = other_circle.tag; //new String?
+            current_circle_origin_tag = current_circle.tag;
+
+            other_circle.tag = current_circle.tag;
+            current_circle.tag = other_circle_origin_tag;
+
+            if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+            {
+                other_circle.tag = other_circle_origin_tag;
+                current_circle.tag = current_circle_origin_tag;
+                init_match_checking = false;
+                return true;
+            }
+            other_circle.tag = other_circle_origin_tag;
+            current_circle.tag = current_circle_origin_tag;
+        }
+        if (current_circle.GetComponent<Circle>().GetPosition().y < height - 1)
+        { //check top
+            other_circle = circles_on_panel[j, i + 1];
+            other_circle_origin_tag = other_circle.tag; //new String?
+            current_circle_origin_tag = current_circle.tag;
+
+            other_circle.tag = current_circle.tag;
+            current_circle.tag = other_circle_origin_tag;
+
+            if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+            {
+                other_circle.tag = other_circle_origin_tag;
+                current_circle.tag = current_circle_origin_tag;
+                init_match_checking = false;
+                return true;
+            }
+            other_circle.tag = other_circle_origin_tag;
+            current_circle.tag = current_circle_origin_tag;
+        }
+
+        if (current_circle.GetComponent<Circle>().GetPosition().x < width - 1)
+        { //check right
+            other_circle = circles_on_panel[j + 1, i];
+            other_circle_origin_tag = other_circle.tag; //new String?
+            current_circle_origin_tag = current_circle.tag;
+
+            other_circle.tag = current_circle.tag;
+            current_circle.tag = other_circle_origin_tag;
+
+            if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+            {
+                other_circle.tag = other_circle_origin_tag;
+                current_circle.tag = current_circle_origin_tag;
+                init_match_checking = false;
+                return true;
+            }
+            other_circle.tag = other_circle_origin_tag;
+            current_circle.tag = current_circle_origin_tag;
+        }
+        if (current_circle.GetComponent<Circle>().GetPosition().y > 0)
+        { //check bot
+            other_circle = circles_on_panel[j, i - 1];
+            other_circle_origin_tag = other_circle.tag; //new String?
+            current_circle_origin_tag = current_circle.tag;
+
+            other_circle.tag = current_circle.tag;
+            current_circle.tag = other_circle_origin_tag;
+
+            if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
+            {
+                other_circle.tag = other_circle_origin_tag;
+                current_circle.tag = current_circle_origin_tag;
+                init_match_checking = false;
+                return true;
+            }
+            other_circle.tag = other_circle_origin_tag;
+            current_circle.tag = current_circle_origin_tag;
+        }
+        init_match_checking = false;
+        return false;
+    }
+
+    public bool CheckMatchExist() //Check if there are circles can match 3
     {
         for(int i = 0; i < height; i++)
         {
@@ -462,7 +598,7 @@ public class GamePanel_Controller : MonoBehaviour {
                 init_match_checking = true;
                 GameObject current_circle = circles_on_panel[j, i];
                 GameObject other_circle;
-                string other_circle_origin_tag=null;
+                string other_circle_origin_tag = null;
                 string current_circle_origin_tag = null;
 
                 if (current_circle.GetComponent<Circle>().GetPosition().x > 0) //check left
@@ -477,7 +613,7 @@ public class GamePanel_Controller : MonoBehaviour {
                     if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
                     {
                         other_circle.tag = other_circle_origin_tag;
-                        current_circle.tag =  current_circle_origin_tag;
+                        current_circle.tag = current_circle_origin_tag;
                         init_match_checking = false;
                         return true;
                     }
@@ -486,12 +622,12 @@ public class GamePanel_Controller : MonoBehaviour {
                 }
                 if (current_circle.GetComponent<Circle>().GetPosition().y < height - 1)
                 { //check top
-                    other_circle = circles_on_panel[j, i+1];
+                    other_circle = circles_on_panel[j, i + 1];
                     other_circle_origin_tag = other_circle.tag; //new String?
                     current_circle_origin_tag = current_circle.tag;
 
-                    other_circle.tag =  current_circle.tag;
-                    current_circle.tag =  other_circle_origin_tag;
+                    other_circle.tag = current_circle.tag;
+                    current_circle.tag = other_circle_origin_tag;
 
                     if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
                     {
@@ -504,38 +640,38 @@ public class GamePanel_Controller : MonoBehaviour {
                     current_circle.tag = current_circle_origin_tag;
                 }
 
-                if (current_circle.GetComponent<Circle>().GetPosition().x < width-1)
+                if (current_circle.GetComponent<Circle>().GetPosition().x < width - 1)
                 { //check right
-                    other_circle = circles_on_panel[j+1, i];
-                    other_circle_origin_tag =  other_circle.tag; //new String?
-                    current_circle_origin_tag =  current_circle.tag;
+                    other_circle = circles_on_panel[j + 1, i];
+                    other_circle_origin_tag = other_circle.tag; //new String?
+                    current_circle_origin_tag = current_circle.tag;
 
-                    other_circle.tag =  current_circle.tag;
-                    current_circle.tag =other_circle_origin_tag;
+                    other_circle.tag = current_circle.tag;
+                    current_circle.tag = other_circle_origin_tag;
 
                     if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
                     {
                         other_circle.tag = other_circle_origin_tag;
-                        current_circle.tag =  current_circle_origin_tag;
+                        current_circle.tag = current_circle_origin_tag;
                         init_match_checking = false;
                         return true;
                     }
                     other_circle.tag = other_circle_origin_tag;
                     current_circle.tag = current_circle_origin_tag;
                 }
-                if (current_circle.GetComponent<Circle>().GetPosition().y>0)
+                if (current_circle.GetComponent<Circle>().GetPosition().y > 0)
                 { //check bot
-                    other_circle = circles_on_panel[j, i-1];
-                    other_circle_origin_tag =  other_circle.tag; //new String?
-                    current_circle_origin_tag =  current_circle.tag;
+                    other_circle = circles_on_panel[j, i - 1];
+                    other_circle_origin_tag = other_circle.tag; //new String?
+                    current_circle_origin_tag = current_circle.tag;
 
-                    other_circle.tag =  current_circle.tag;
-                    current_circle.tag =  other_circle_origin_tag;
+                    other_circle.tag = current_circle.tag;
+                    current_circle.tag = other_circle_origin_tag;
 
                     if (CheckMatchAt((int)other_circle.GetComponent<Circle>().GetPosition().x, (int)other_circle.GetComponent<Circle>().GetPosition().y))
                     {
-                        other_circle.tag =  other_circle_origin_tag;
-                        current_circle.tag =  current_circle_origin_tag;
+                        other_circle.tag = other_circle_origin_tag;
+                        current_circle.tag = current_circle_origin_tag;
                         init_match_checking = false;
                         return true;
                     }
@@ -600,43 +736,60 @@ public class GamePanel_Controller : MonoBehaviour {
             //yield return new WaitForSeconds(0.02f);
 
             match_exist = CheckMatchExist();
+            if (transform.tag != "Sub_Board") 
+            shuffle_sound.Play();
         }
 
     }
 
     public void ReduceGoal(string matched_tag)
     {
-        string[] t = new string[3];
-        t[0] = circle_types[type_index[0]].tag;
-        t[1] = circle_types[type_index[1]].tag;
-        t[2] = circle_types[type_index[2]].tag;
+        if (transform.tag != "Sub_Board")
+        {
+            string[] t = new string[3];
+            t[0] = circle_types[type_index[0]].tag;
+            t[1] = circle_types[type_index[1]].tag;
+            t[2] = circle_types[type_index[2]].tag;
 
-        if (t[0].Equals(matched_tag)) 
-        {
-            goal1_left--;
-            if (goal1_left <= 0)
-                goal1_left = 0;
+            if (t[0].Equals(matched_tag))
+            {
+                goal1_left--;
+                if (goal1_left <= 0)
+                    goal1_left = 0;
+            }
+            if (t[1].Equals(matched_tag))
+            {
+                goal2_left--;
+                if (goal2_left <= 0)
+                    goal2_left = 0;
+            }
+            if (t[2].Equals(matched_tag))
+            {
+                goal3_left--;
+                if (goal3_left <= 0)
+                    goal3_left = 0;
+            }
+            if (goal1_left <= 0 && goal2_left <= 0 && goal3_left <= 0)
+            {
+                mission_clear = true;
+                game_over = true;
+            }
         }
-        if (t[1].Equals(matched_tag)) 
-        {
-            goal2_left--;
-            if (goal2_left <= 0)
-                goal2_left = 0;
-        }
-        if (t[2].Equals(matched_tag)) 
-        {
-            goal3_left--;
-            if (goal3_left <= 0)
-                goal3_left = 0;
-        }
+    }
+    public bool GetMatchHintOn()
+    {
+        return match_hint_on;
     }
     public void Move()
     {
-        move_left--;
-        if (move_left <= 0)
+        if (transform.tag != "Sub_Board")
         {
-            move_left = 0;
-            game_over = true;
+            move_left--;
+            if (move_left <= 0)
+            {
+                move_left = 0;
+                game_over = true;
+            }
         }
     }
     public bool IsGameOver()
@@ -661,31 +814,21 @@ public class GamePanel_Controller : MonoBehaviour {
             }
         }
 
-        game_over_text.enabled = false;
-        restart_bt.enabled = false;
-        restart_bt.GetComponentInChildren<Image>().enabled = false;
-        restart_bt.GetComponentInChildren<Text>().enabled = false;
-        picked_goal_color = new Color[3];
-        type_index = new int[3];
-        
-
-        for (int i = 0; i < 3; i++)
+        if (transform.tag != "Sub_Board")
         {
-            type_index[i] = Random.Range(0, circle_types.Length);
-            Color temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
-            bool already_picked = false;
-            for (int j = 0; j < picked_goal_color.Length; j++)
+            game_over_text.enabled = false;
+            restart_bt.enabled = false;
+            restart_bt.GetComponentInChildren<Image>().enabled = false;
+            restart_bt.GetComponentInChildren<Text>().enabled = false;
+            picked_goal_color = new Color[3];
+            type_index = new int[3];
+
+
+            for (int i = 0; i < 3; i++)
             {
-                if (picked_goal_color[j] == temp)
-                {
-                    already_picked = true;
-                }
-            }
-            while (already_picked)
-            {
-                already_picked = false;
                 type_index[i] = Random.Range(0, circle_types.Length);
-                temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
+                Color temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
+                bool already_picked = false;
                 for (int j = 0; j < picked_goal_color.Length; j++)
                 {
                     if (picked_goal_color[j] == temp)
@@ -693,23 +836,35 @@ public class GamePanel_Controller : MonoBehaviour {
                         already_picked = true;
                     }
                 }
+                while (already_picked)
+                {
+                    already_picked = false;
+                    type_index[i] = Random.Range(0, circle_types.Length);
+                    temp = circle_types[type_index[i]].GetComponent<SpriteRenderer>().color;
+                    for (int j = 0; j < picked_goal_color.Length; j++)
+                    {
+                        if (picked_goal_color[j] == temp)
+                        {
+                            already_picked = true;
+                        }
+                    }
+                }
+                picked_goal_color[i] = temp;
             }
-            picked_goal_color[i] = temp;
+
+
+
+            move_left = Random.Range(25, 35);
+            move_left_text.text = "Move left: " + move_left;
+            goal1_left = Random.Range(15, 25);
+            goal1.GetComponent<Image>().color = picked_goal_color[0];
+            goal2.GetComponent<Image>().color = picked_goal_color[1];
+            goal3.GetComponent<Image>().color = picked_goal_color[2];
+            goal2_left = Random.Range(15, 25);
+            goal3_left = Random.Range(15, 25);
+
+            game_over = false;
         }
-
-
-
-        move_left = Random.Range(20, 25);
-        move_left_text.text = "Move left: " + move_left;
-        goal1_left = Random.Range(15, 25);
-        goal1.GetComponent<Image>().color = picked_goal_color[0];
-        goal2.GetComponent<Image>().color = picked_goal_color[1];
-        goal3.GetComponent<Image>().color = picked_goal_color[2];
-        goal2_left = Random.Range(15, 25);
-        goal3_left = Random.Range(15, 25);
-
-        game_over = false;
-
         circles_on_panel = new GameObject[width, height];
         if (tiles != null)
         {
