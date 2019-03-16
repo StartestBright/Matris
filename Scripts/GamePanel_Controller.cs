@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GamePanel_Controller : MonoBehaviour {
@@ -9,7 +10,8 @@ public class GamePanel_Controller : MonoBehaviour {
     private bool init_match_checking = true;
     private bool can_move = true;
     private bool match_hint_on = false;
-    
+    private bool exit_panel_on = false;
+
     private Slider fx_volume_slider;
     private Slider bgm_volume_slider;
     private bool setting_panel_on = false;
@@ -23,8 +25,7 @@ public class GamePanel_Controller : MonoBehaviour {
     private float bug_fix_timer=0;
     private float match_hint_timer = 0;
     private float match_hink_timer_delay = 5f;
-
-
+    
     int[] type_index;
 
     public int width, height;
@@ -32,16 +33,17 @@ public class GamePanel_Controller : MonoBehaviour {
     public GameObject[] circle_types;
     public GameObject[,] circles_on_panel;
     public GameObject settings_panel;
-    
-    
-
+    public GameObject exit_panel;
     public Text move_left_text;
     public Image goal1, goal2, goal3;
     public Text game_over_text;
     public Button restart_bt;
    
 
-
+    /*
+     * Initialise settings and game panel and circles
+     * Check if there are circles matching if so , shuffle them
+     */
     void Start () {
         
         matching_sound = GetComponents<AudioSource>()[0];
@@ -56,22 +58,41 @@ public class GamePanel_Controller : MonoBehaviour {
         CheckToShuffle();
     }
 	
+    /* Set volumes according to the sliders' values
+     * Checking goals left
+     * If there is no match in certain amount of time give player some hints
+     * */
 	void Update () {
-        PlayerPrefs.SetFloat("fx_volume", fx_volume_slider.value);
-        PlayerPrefs.SetFloat("bgm_volume", bgm_volume_slider.value);
+        if (Input.GetKey(KeyCode.Escape))
+            Exit();
 
-        if (setting_panel_on)
-            settings_panel.SetActive(true);
-        else
-            settings_panel.SetActive(false);
+        
+        if (fx_volume_slider != null && bgm_volume_slider != null && settings_panel != null)
+        {
+            PlayerPrefs.SetFloat("fx_volume", fx_volume_slider.value);
+            PlayerPrefs.SetFloat("bgm_volume", bgm_volume_slider.value);
+            if (setting_panel_on)
+                settings_panel.SetActive(true);
+            else
+                settings_panel.SetActive(false);
+        }
 
-        if (Input.anyKey)
-        if(matching_sound!=null)
-            matching_sound.volume = PlayerPrefs.GetFloat("fx_volume");
+        if (exit_panel != null)
+        {
+            if (exit_panel_on)
+            {
+                exit_panel.SetActive(true);
+            }
+            else
+                exit_panel.SetActive(false);
+        }
+        
+        if (matching_sound!=null)
+            matching_sound.volume = PlayerPrefs.GetFloat("fx_volume",1);
         if(shuffle_sound!=null)
-            shuffle_sound.volume = PlayerPrefs.GetFloat("fx_volume");
+            shuffle_sound.volume = PlayerPrefs.GetFloat("fx_volume",1);
         if(bgm!=null)
-            bgm.volume = PlayerPrefs.GetFloat("bgm_volume");
+            bgm.volume = PlayerPrefs.GetFloat("bgm_volume",1);
         if (transform.tag != "Sub_Board")
         {
             goal1.GetComponentInChildren<Text>().text = "" + goal1_left;
@@ -497,6 +518,11 @@ public class GamePanel_Controller : MonoBehaviour {
         
 
     }
+    public void PlayMatchSound()
+    {
+        if (matching_sound != null)
+            matching_sound.Play();
+    }
     public void DestroyMatches(bool shuffle)
     {
         for(int i = 0; i < height; i++)
@@ -817,8 +843,11 @@ public class GamePanel_Controller : MonoBehaviour {
     
     public void Init()
     {
-        fx_volume_slider = settings_panel.GetComponentsInChildren<UnityEngine.UI.Slider>()[0];
-        bgm_volume_slider = settings_panel.GetComponentsInChildren<Slider>()[1];
+        if (settings_panel != null)
+        {
+            fx_volume_slider = settings_panel.GetComponentsInChildren<UnityEngine.UI.Slider>()[0];
+            bgm_volume_slider = settings_panel.GetComponentsInChildren<Slider>()[1];
+        }
         if (circles_on_panel != null)
         {
             for (int i = 0; i < height; i++)
@@ -930,6 +959,17 @@ public class GamePanel_Controller : MonoBehaviour {
     {
         setting_panel_on = !setting_panel_on;
     }
-
+    public void SetExitPanelOn()
+    {
+        exit_panel_on = !exit_panel_on;
+    }
+    public bool GetSettingPanelOn()
+    {
+        return setting_panel_on;
+    }
+    public void Exit()
+    {
+        SceneManager.LoadScene("Menu");
+    }
 
 }

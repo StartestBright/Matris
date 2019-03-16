@@ -13,13 +13,11 @@ public class Circle : MonoBehaviour  {
     private bool can_fall = false;
     private int horizontal_match_count,vertical_match_count,square_match_count;
     
-
-	// Use this for initialization
+    
 	void Start () {
         gamepanel = FindObjectOfType<GamePanel_Controller>();
 	}
 	
-	// Update is called once per frame
 	void Update () {
         if(transform.position.x != x_position || transform.position.y != y_position)
         {
@@ -30,25 +28,8 @@ public class Circle : MonoBehaviour  {
         {
             SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(44, 11, 35);
-            //gamepanel.DestroyMatchAt(x_position, y_position);
             
         }
-        /*
-        if (y_position > 0)
-        {
-            if (gamepanel.circles_on_panel[x_position, y_position - 1] == null)
-                can_fall = true;
-            else
-            {
-                can_fall = false;
-            }
-        }
-
-        if (can_fall)
-        {
-            CircleFalling();
-        }
-        */
 
         
         if (gamepanel.GetMatchHintOn())
@@ -68,7 +49,7 @@ public class Circle : MonoBehaviour  {
     }
     private void OnMouseUp()
     {
-        if (!gamepanel.IsGameOver())
+        if (!gamepanel.IsGameOver() &&!gamepanel.GetSettingPanelOn())
         {
             if (gamepanel.getCanMove())
             {
@@ -168,19 +149,17 @@ public class Circle : MonoBehaviour  {
             else //If matched
             {
                 if (transform.parent.tag == "Sub_Board")
+                {
+                    gamepanel.PlayMatchSound();
                     SceneManager.LoadScene("Main");
+                }
                 yield return new WaitForSeconds(.2f); //wait for 0.2 secs to move circles again
-                //gamepanel.setCanMove(true);
                 gamepanel.DestroyMatches(false);
                 gamepanel.RefillGamePanel();
                 gamepanel.CheckToShuffle();
 
                 
             }
-            //yield return new WaitForSeconds(0.5f);
-            //yield return new WaitForSeconds(.4f);
-            //StartCoroutine(gamepanel.CheckToShuffle());
-
         }
        
 
@@ -197,7 +176,6 @@ public class Circle : MonoBehaviour  {
                 y_position -= 1;
             }
             
-            //gamepanel.StartCoroutine(gamepanel.RefillGamePanelAt(x_position));
             if (y_position > 0)
                 if (gamepanel.circles_on_panel[x_position, y_position - 1] != null)
                 {
