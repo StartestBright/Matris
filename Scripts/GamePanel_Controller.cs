@@ -9,7 +9,10 @@ public class GamePanel_Controller : MonoBehaviour {
     private bool init_match_checking = true;
     private bool can_move = true;
     private bool match_hint_on = false;
-
+    
+    private Slider fx_volume_slider;
+    private Slider bgm_volume_slider;
+    private bool setting_panel_on = false;
     private int move_left;
     private int goal1_left, goal2_left, goal3_left;
     private Color[] picked_goal_color;
@@ -28,7 +31,7 @@ public class GamePanel_Controller : MonoBehaviour {
     public GameObject background_tile;
     public GameObject[] circle_types;
     public GameObject[,] circles_on_panel;
-
+    public GameObject settings_panel;
     
     
 
@@ -54,6 +57,21 @@ public class GamePanel_Controller : MonoBehaviour {
     }
 	
 	void Update () {
+        PlayerPrefs.SetFloat("fx_volume", fx_volume_slider.value);
+        PlayerPrefs.SetFloat("bgm_volume", bgm_volume_slider.value);
+
+        if (setting_panel_on)
+            settings_panel.SetActive(true);
+        else
+            settings_panel.SetActive(false);
+
+        if (Input.anyKey)
+        if(matching_sound!=null)
+            matching_sound.volume = PlayerPrefs.GetFloat("fx_volume");
+        if(shuffle_sound!=null)
+            shuffle_sound.volume = PlayerPrefs.GetFloat("fx_volume");
+        if(bgm!=null)
+            bgm.volume = PlayerPrefs.GetFloat("bgm_volume");
         if (transform.tag != "Sub_Board")
         {
             goal1.GetComponentInChildren<Text>().text = "" + goal1_left;
@@ -799,6 +817,8 @@ public class GamePanel_Controller : MonoBehaviour {
     
     public void Init()
     {
+        fx_volume_slider = settings_panel.GetComponentsInChildren<UnityEngine.UI.Slider>()[0];
+        bgm_volume_slider = settings_panel.GetComponentsInChildren<Slider>()[1];
         if (circles_on_panel != null)
         {
             for (int i = 0; i < height; i++)
@@ -906,5 +926,10 @@ public class GamePanel_Controller : MonoBehaviour {
                 }
             }
     }
-    
+    public void SetSettingPanelOn()
+    {
+        setting_panel_on = !setting_panel_on;
+    }
+
+
 }
